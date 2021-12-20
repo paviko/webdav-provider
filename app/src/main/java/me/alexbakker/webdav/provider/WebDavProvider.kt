@@ -26,8 +26,9 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.CountDownLatch
+import kotlin.coroutines.CoroutineContext
 
-class WebDavProvider : DocumentsProvider() {
+class WebDavProvider : DocumentsProvider(), CoroutineScope {
     private val TAG: String = WebDavProvider::class.java.simpleName
 
     private val DEFAULT_ROOT_PROJECTION = arrayOf(
@@ -62,8 +63,13 @@ class WebDavProvider : DocumentsProvider() {
     private lateinit var looper: WebDavFileReadCallbackLooper
     private lateinit var storageManager: StorageManager
 
+    private lateinit var parentJob: Job
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + parentJob
+
     override fun onCreate(): Boolean {
         Log.d(TAG, "onCreate()")
+        parentJob = SupervisorJob()
 
         val context = mustGetContext()
         looper = WebDavFileReadCallbackLooper()
@@ -132,7 +138,6 @@ class WebDavProvider : DocumentsProvider() {
         return result
     }
 
-    @DelicateCoroutinesApi
     override fun openDocument(
         documentId: String,
         mode: String,
@@ -173,7 +178,7 @@ class WebDavProvider : DocumentsProvider() {
                 val pipe = ParcelFileDescriptor.createReliablePipe()
                 val inDesc = pipe[0]
                 val inStream = ParcelFileDescriptor.AutoCloseInputStream(inDesc)
-                val job = GlobalScope.launch(Dispatchers.IO) {
+                val job = launch {
                     val res = inStream.use {
                         account.client.putFile(
                             file.path.toString(),

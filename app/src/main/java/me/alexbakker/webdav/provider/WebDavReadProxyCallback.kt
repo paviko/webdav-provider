@@ -82,14 +82,26 @@ class WebDavReadProxyCallback(
                 openWebDavStream(offset)
             }
             nextOffset != offset -> {
-                Log.w(TAG, "Unexpected offset: offset=$offset, expOffset=$nextOffset")
-                inStream!!.close()
+                // if the caller seeks ahead less than 1MB,
+                val diff = offset - nextOffset
+                if (diff in 1..1_000_000) {
+                    nextOffset = offset
+                    val bytes = ByteArray(diff.toInt())
+                    inStream!!.let {
+                        it.read(bytes)
+                        cacheWriter?.stream?.write(bytes)
+                        it
+                    }
+                } else {
+                    Log.w(TAG, "Unexpected offset: offset=$offset, expOffset=$nextOffset")
+                    inStream!!.close()
 
-                // if the caller starts seeking in the stream, give up on trying to cache the file
-                cacheWriter?.abort()
+                    // if the caller starts seeking in the stream, give up on trying to cache the file
+                    cacheWriter?.abort()
 
-                Log.d(TAG, "Reopening stream at: offset=$offset")
-                openWebDavStream(offset)
+                    Log.d(TAG, "Reopening stream at: offset=$offset")
+                    openWebDavStream(offset)
+                }
             }
             else -> {
                 inStream!!
