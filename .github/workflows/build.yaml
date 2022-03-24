@@ -14,12 +14,12 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
-          name: webdav-provider
+          name: webdav-provider.apk
           path: ${{ github.workspace }}/app/build/outputs/apk/release/app-release-unsigned.apk    
       - name: Upload APK Debug
         uses: actions/upload-artifact@v2
         with:
-          name: webdav-provider
+          name: webdav-provider-debug.apk
           path: ${{ github.workspace }}/app/build/outputs/apk/debug/app-debug.apk    
 #  test:
 #      name: Run Unit Tests
