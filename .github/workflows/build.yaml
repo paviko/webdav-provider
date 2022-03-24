@@ -10,7 +10,7 @@ jobs:
         run: ./gradlew build
       - name: List
         run: ls -laR
-        working-directory: ${{ github.workspace }}/app/build/output
+        working-directory: ${{ github.workspace }}/app/build/outputs
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
