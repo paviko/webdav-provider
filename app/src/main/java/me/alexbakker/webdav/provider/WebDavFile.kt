@@ -41,7 +41,7 @@ class WebDavFile(
         get() = URLDecoder.decode(name, StandardCharsets.UTF_8.name())
 
     constructor (res: Response, href: String = res.href)
-            : this(Paths.get(href), res.propstat[0].prop.resourcetype.collection != null) {
+            : this(Paths.get(href), res.propstat[0].prop.resourcetype?.collection != null) {
         val prop = res.propstat[0].prop
         etag = prop.getetag
         contentType = parseContentType(name, prop.getcontenttype)
