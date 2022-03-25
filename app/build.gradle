@@ -87,6 +87,7 @@ android {
             resValue("string", "app_name", appNameDebug)
             manifestPlaceholders = [providerAuthority: providerAuthorityDebug]
             buildConfigField("String", "PROVIDER_AUTHORITY", "\"${providerAuthorityDebug}\"")
+            debuggable true
         }
         release {
             resValue("string", "app_name", appName)
